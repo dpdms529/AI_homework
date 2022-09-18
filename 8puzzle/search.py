@@ -8,6 +8,7 @@ import inspect
 import sys
 import random
 
+from queue import PriorityQueue, Queue
 
 def raiseNotDefined():
     fileName = inspect.stack()[1][1]
@@ -98,14 +99,57 @@ def depth_first_search(problem):
     """Search the deepest nodes in the search tree first."""
 
     "*** YOUR CODE HERE ***"
-    raiseNotDefined()
+    start = problem.getStartState()
+    node = [(start, "", 0)]   # class is better
+    frontier = [node]
+
+    explored = set()
+
+    while frontier:
+        node = frontier.pop()
+        state = node[-1][0]
+        if problem.isGoalState(state):
+            return [x[1] for x in node][1:]
+
+        if state not in explored:
+            explored.add(state)
+        
+            for successor in problem.getSuccessors(state):
+                if successor[0] not in explored:
+                    parent = node[:]
+                    parent.append(successor)
+                    frontier.append(parent)
+    return []
+
+    # raiseNotDefined()
 
 
 def breadth_first_search(problem):
     """Search the shallowest nodes in the search tree first."""
 
     "*** YOUR CODE HERE ***"
-    raiseNotDefined()
+    start = problem.getStartState()
+    node = [(start, "", 0)]   # class is better
+    frontier = Queue()
+    frontier.put(node)
+
+    explored = set()
+    explored.add(start)
+
+    while frontier:
+        node = frontier.get()
+        state = node[-1][0]
+        if problem.isGoalState(state):
+            return [x[1] for x in node][1:]
+
+        for successor in problem.getSuccessors(state):
+            if successor[0] not in explored:
+                explored.add(state)
+                parent = node[:]
+                parent.append(successor)
+                frontier.put(parent)
+    return []
+    # raiseNotDefined()
 
 
 def uniform_cost_search(problem):
