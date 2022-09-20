@@ -216,12 +216,13 @@ def aStar_search(problem, heuristic=heuristic_number_of_misplaced_tiles):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
     start = problem.getStartState()
-    node = [Node(start, "", heuristic(start))]   # class is better
+    current_heuristic = heuristic(start)
+    node = [Node(start, "", current_heuristic)]   # class is better
     frontier = PriorityQueue()
     frontier.put(node)
 
     explored = dict()
-    explored[start] = 0
+    explored[start] = current_heuristic
 
     while frontier:
         node = frontier.get()
