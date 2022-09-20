@@ -61,6 +61,14 @@ class SearchProblem:
         """
         pass
 
+class Node:
+    def __init__(self, state, action, cost):
+        self.state = state
+        self.action = action
+        self.cost = cost
+    
+    def __lt__(self,other):
+        return self.cost < other.cost
 
 def random_search(problem):
     """
@@ -100,24 +108,23 @@ def depth_first_search(problem):
 
     "*** YOUR CODE HERE ***"
     start = problem.getStartState()
-    node = [(start, "", 0)]   # class is better
+    node = [Node(start, "", 0)]   # class is better
     frontier = [node]
 
     explored = set()
 
     while frontier:
         node = frontier.pop()
-        state = node[-1][0]
+        state = node[-1].state
         if problem.isGoalState(state):
-            return [x[1] for x in node][1:]
+            return [x.action for x in node][1:]
 
         if state not in explored:
             explored.add(state)
-        
             for successor in problem.getSuccessors(state):
                 if successor[0] not in explored:
                     parent = node[:]
-                    parent.append(successor)
+                    parent.append(Node(successor[0], successor[1], successor[2]))
                     frontier.append(parent)
     return []
 
@@ -129,7 +136,7 @@ def breadth_first_search(problem):
 
     "*** YOUR CODE HERE ***"
     start = problem.getStartState()
-    node = [(start, "", 0)]   # class is better
+    node = [Node(start, "", 0)]   # class is better
     frontier = Queue()
     frontier.put(node)
 
@@ -138,15 +145,15 @@ def breadth_first_search(problem):
 
     while frontier:
         node = frontier.get()
-        state = node[-1][0]
+        state = node[-1].state
         if problem.isGoalState(state):
-            return [x[1] for x in node][1:]
+            return [x.action for x in node][1:]
 
         for successor in problem.getSuccessors(state):
             if successor[0] not in explored:
-                explored.add(state)
+                explored.add(successor[0])
                 parent = node[:]
-                parent.append(successor)
+                parent.append(Node(successor[0], successor[1], successor[2]))
                 frontier.put(parent)
     return []
     # raiseNotDefined()
@@ -155,8 +162,46 @@ def breadth_first_search(problem):
 def uniform_cost_search(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    raiseNotDefined()
+    start = problem.getStartState()
+    node = [Node(start, "", 0)]   # class is better
+    frontier = PriorityQueue()
+    frontier.put(node)
 
+    explored = dict()
+    explored[start] = 0
+
+    while frontier:
+        node = frontier.get()
+        state = node[-1].state
+        if problem.isGoalState(state):
+            return [x.action for x in node][1:]
+
+        for successor in problem.getSuccessors(state):
+            successor_cost = node[-1].cost + successor[2]
+            if successor[0] not in explored or explored[successor[0]] > successor_cost:
+                explored[successor[0]] = successor_cost
+                parent = node[:]
+                parent.append(Node(successor[0], successor[1], successor_cost))
+                frontier.put(parent)
+
+    return []
+    # raiseNotDefined()
+
+def heuristic_number_of_misplaced_tiles(state, problem=None):
+    """
+    A heuristic function estimates the cost from the current state to the nearest
+    goal in the provided SearchProblem. This heuristic is trivial.
+    """
+    "*** YOUR CODE HERE ***"
+    current = 1
+    count = 0
+    for i in range(3):
+        for j in range(3):
+            if current % 9 != state.cells[i][j]:
+                count += 1
+            current += 1
+    
+    return count
 
 def heuristic_manhattan(state, problem=None):
     """
@@ -167,10 +212,34 @@ def heuristic_manhattan(state, problem=None):
     return 0
 
 
-def aStar_search(problem, heuristic=heuristic_manhattan):
+def aStar_search(problem, heuristic=heuristic_number_of_misplaced_tiles):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    raiseNotDefined()
+    start = problem.getStartState()
+    node = [Node(start, "", heuristic(start))]   # class is better
+    frontier = PriorityQueue()
+    frontier.put(node)
+
+    explored = dict()
+    explored[start] = 0
+
+    while frontier:
+        node = frontier.get()
+        state = node[-1].state
+        current_heuristic = heuristic(state)
+        if problem.isGoalState(state):
+            return [x.action for x in node][1:]
+
+        for successor in problem.getSuccessors(state):
+            successor_cost = node[-1].cost + successor[2] - current_heuristic + heuristic(successor[0])
+            if successor[0] not in explored or explored[successor[0]] > successor_cost:
+                explored[successor[0]] = successor_cost
+                parent = node[:]
+                parent.append(Node(successor[0], successor[1], successor_cost))
+                frontier.put(parent)
+
+    return []
+    # raiseNotDefined()
 
 
 # Abbreviations
