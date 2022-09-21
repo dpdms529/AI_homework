@@ -123,7 +123,6 @@ def depth_first_search(problem):
                     actions.append(successor[1])
                     frontier.append(Node(successor[0], actions))
     return []
-
     # raiseNotDefined()
 
 
